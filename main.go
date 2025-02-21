@@ -7,16 +7,14 @@ import (
 	"log"
 )
 
-
 func main() {
 
-	
 	ctx := context.Background()
 
 	log.Println("initializing application")
-	\\initializes sqlite tables
+	//initializes sqlite tables
 	pers.InitDB()
-	\\ registers handlers for scan and query and starts server
+	//registers handlers for scan and query and starts server
 	middleware.Inithandlers(ctx)
 
 }

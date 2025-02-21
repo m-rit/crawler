@@ -10,6 +10,7 @@ import (
 	"log"
 )
 
+// inserts scan results into two tables  - scan_results and vulnerabilties
 func Insertintodb(scanData []types.ScanResultWrapper) error {
 	var failed bool
 	for _, scan := range scanData {
@@ -37,8 +38,9 @@ func Insertintodb(scanData []types.ScanResultWrapper) error {
 
 }
 
+// inserts into vulnerabilties table some of the columns that have nested objects are kept in JSONB format, rest are seperated.
 func insertVulnerability(id string, vuln types.Vulnerability) error {
-	log.Println("Inserted vulnerability:", vuln)
+	log.Println("Inserted vulnerability for scan", id)
 
 	risk_factors, _ := json.Marshal(vuln.RiskFactors)
 	_, err := DB.Exec(`
@@ -56,6 +58,7 @@ func insertVulnerability(id string, vuln types.Vulnerability) error {
 	return nil
 }
 
+//inserts into scan_results table
 func insertScanResult(scanresult types.ScanResultWrapper) error {
 	scan := scanresult.ScanResult
 
@@ -74,7 +77,6 @@ func insertScanResult(scanresult types.ScanResultWrapper) error {
 	return err
 }
 
-// fmt.Println("inserted into database")
 // DB is a global variable for the SQLite database connection
 var DB *sql.DB
 
@@ -135,6 +137,7 @@ CREATE TABLE IF NOT EXISTS scan_results (
 
 }
 
+// queries vulnerabilties tables for queries with severity HIGH
 func QueryfromDB(severity any) []types.Vulnerability {
 
 	results := []types.Vulnerability{}
