@@ -58,7 +58,7 @@ func insertVulnerability(id string, vuln types.Vulnerability) error {
 	return nil
 }
 
-//inserts into scan_results table
+// inserts into scan_results table
 func insertScanResult(scanresult types.ScanResultWrapper) error {
 	scan := scanresult.ScanResult
 

@@ -33,6 +33,7 @@ func registerhandlers(r *mux.Router) {
 	r.HandleFunc("/query", queryhandler)
 }
 
+// scanhanldler parses the scan request  to get repo and filenames. Then it concurrently starts routines to fetch each file data. If all files are not fetched until max retries. it returns 500.
 var scanhandler = func(writer http.ResponseWriter, request *http.Request) {
 
 	payload := getfilefromreq(request.Body)
@@ -48,7 +49,8 @@ var scanhandler = func(writer http.ResponseWriter, request *http.Request) {
 	donecount := 0
 	donearr := make([]bool, len(files))
 
-	const maxretries = 2
+	const maxretries = 2 //maxretries is the number of times the server tries to fetch the files until it does not succeed.
+
 	for retry := 0; retry < maxretries; retry++ {
 		done := make(chan details, len(files))
 
@@ -64,7 +66,6 @@ var scanhandler = func(writer http.ResponseWriter, request *http.Request) {
 			go func(lFile string, lidx int) {
 				defer wg.Done()
 
-				// do reverse proxy with timeout
 				response := sendreverseproxy(lFile, payload.Repo)
 
 				if response.StatusCode != http.StatusOK {
@@ -72,7 +73,6 @@ var scanhandler = func(writer http.ResponseWriter, request *http.Request) {
 					return
 				}
 
-				//response := &http.Response{}
 				defer response.Body.Close()
 
 				lbody, err := ioutil.ReadAll(response.Body)
@@ -122,14 +122,16 @@ var scanhandler = func(writer http.ResponseWriter, request *http.Request) {
 
 }
 
+//HttpClient interface implements Do method that is used by both Http.Client and MockClient structs
 type HttpClient interface {
 	Do(req *http.Request) (*http.Response, error)
 }
 
+// client that sends reverseproxy request
 var client HttpClient = &http.Client{Timeout: time.Second * 10}
 
+//sendreverseproxy sends request to github.com to fetch json files for a particular filename
 func sendreverseproxy(file string, repo string) *http.Response {
-
 	//https://raw.githubusercontent.com/velancio/vulnerability_scans/refs/heads/main/vulnscan1011.json
 
 	urlquery := fmt.Sprintf("https://raw.githubusercontent.com/" + repo + "/vulnerability_scans/refs/heads/main/" + file)
