@@ -29,7 +29,7 @@ func TestInithandlers(t *testing.T) {
 	defer pers.DropTables()
 
 	client = &MockHTTPClient{DoFunc: func(req *http.Request) (*http.Response, error) {
-		if req.URL.String() == "https://raw.githubusercontent.com/test-repo/vulnerability_scans/refs/heads/main/test-file1.json" {
+		if req.URL.String() == "https://raw.githubusercontent.com/velancio/test-repo/refs/heads/main/test-file1.json" {
 			data, err := ioutil.ReadFile("test.json")
 			if err != nil {
 				log.Fatalf("Error reading file: %v", err)
@@ -52,7 +52,6 @@ func TestInithandlers(t *testing.T) {
 	ts := httptest.NewServer(r)
 	defer ts.Close()
 
-	// Example test for /scan route
 	t.Run("TestScanHandler", func(t *testing.T) {
 		// Prepare a request payload
 		payload := types.RequestPayload{

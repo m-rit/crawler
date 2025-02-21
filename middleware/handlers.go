@@ -133,8 +133,8 @@ var client HttpClient = &http.Client{Timeout: time.Second * 10}
 // sendreverseproxy sends request to github.com to fetch json files for a particular filename
 func sendreverseproxy(file string, repo string) *http.Response {
 	//https://raw.githubusercontent.com/velancio/vulnerability_scans/refs/heads/main/vulnscan1011.json
-
-	urlquery := fmt.Sprintf("https://raw.githubusercontent.com/" + repo + "/vulnerability_scans/refs/heads/main/" + file)
+	owner := "velancio" // since requests do not have owner in body
+	urlquery := fmt.Sprintf("https://raw.githubusercontent.com/" + owner + "/" + repo + "/refs/heads/main/" + file)
 	log.Println("Sending reverse proxy to " + urlquery)
 
 	request, err := http.NewRequest("GET", urlquery, nil)
@@ -150,7 +150,7 @@ func sendreverseproxy(file string, repo string) *http.Response {
 	return resp
 }
 
-//getfilefromreq parses the scan requests body to extract repo and file names
+// getfilefromreq parses the scan requests body to extract repo and file names
 func getfilefromreq(body io.ReadCloser) types.RequestPayload {
 
 	var payload types.RequestPayload
@@ -165,7 +165,7 @@ func getfilefromreq(body io.ReadCloser) types.RequestPayload {
 	return payload
 }
 
-//queryhandler implements the handler for query request. It parses the request body to get severity value and returns all matching rows in response
+// queryhandler implements the handler for query request. It parses the request body to get severity value and returns all matching rows in response
 var queryhandler = func(writer http.ResponseWriter, request *http.Request) {
 
 	results := []types.Vulnerability{}
