@@ -19,11 +19,7 @@ import (
 
 func Inithandlers(ctx context.Context) {
 	r := mux.NewRouter()
-	//context.WithDeadline(ctx, time.Time{})
-	//ctx.Value(`TraceId`)
-
-	r.HandleFunc("/scan", scanhandler)
-	r.HandleFunc("/query", queryhandler)
+	registerhandlers(r)
 
 	err := http.ListenAndServe(":8080", r)
 	if err != nil {
@@ -32,8 +28,12 @@ func Inithandlers(ctx context.Context) {
 
 }
 
+func registerhandlers(r *mux.Router) {
+	r.HandleFunc("/scan", scanhandler)
+	r.HandleFunc("/query", queryhandler)
+}
+
 var scanhandler = func(writer http.ResponseWriter, request *http.Request) {
-	// dosomething
 
 	payload := getfilefromreq(request.Body)
 	defer request.Body.Close()
@@ -106,7 +106,7 @@ var scanhandler = func(writer http.ResponseWriter, request *http.Request) {
 		}()
 
 		for i := range done {
-			fmt.Printf("Scanned file number #%d\n", i)
+			//fmt.Printf("Scanned file number #%d\n", i)
 			donearr[i.fileidx] = i.status
 			if i.status {
 				donecount++
@@ -122,7 +122,11 @@ var scanhandler = func(writer http.ResponseWriter, request *http.Request) {
 
 }
 
-var client = http.Client{Timeout: time.Second * 10}
+type HttpClient interface {
+	Do(req *http.Request) (*http.Response, error)
+}
+
+var client HttpClient = &http.Client{Timeout: time.Second * 10}
 
 func sendreverseproxy(file string, repo string) *http.Response {
 
@@ -136,8 +140,6 @@ func sendreverseproxy(file string, repo string) *http.Response {
 		return nil
 	}
 
-	//client := &http.Client{}
-
 	resp, err := client.Do(request)
 	if err != nil {
 		return nil
@@ -146,20 +148,15 @@ func sendreverseproxy(file string, repo string) *http.Response {
 	return resp
 }
 
-type RequestPayload struct {
-	Repo  string   `json:"repo"`
-	Files []string `json:"files"`
-}
+func getfilefromreq(body io.ReadCloser) types.RequestPayload {
 
-func getfilefromreq(body io.ReadCloser) RequestPayload {
-
-	var payload RequestPayload
+	var payload types.RequestPayload
 
 	err := json.NewDecoder(body).Decode(&payload)
 	if err != nil {
 		fmt.Println("here error in decoding", err.Error())
 
-		return RequestPayload{}
+		return types.RequestPayload{}
 	}
 	fmt.Println("here")
 
@@ -170,14 +167,7 @@ var queryhandler = func(writer http.ResponseWriter, request *http.Request) {
 
 	results := []types.Vulnerability{}
 
-	type Filter struct {
-		Severity string `json:"severity"`
-	}
-	type requestpayload struct {
-		Filter Filter `json:"filters"`
-	}
-
-	var lpayload requestpayload
+	var lpayload types.Querypayload
 	err := json.NewDecoder(request.Body).Decode(&lpayload)
 	fmt.Println("here", err)
 	// todo query with pagination

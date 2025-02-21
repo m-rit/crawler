@@ -146,6 +146,7 @@ func QueryfromDB(severity any) []types.Vulnerability {
 	}
 
 	defer res.Close()
+
 	for res.Next() {
 		item := types.Vulnerability{}
 		risk_factor := []byte{}
@@ -166,4 +167,21 @@ func QueryfromDB(severity any) []types.Vulnerability {
 
 	return results
 
+}
+
+// only used for testing
+func DropTables() {
+
+	_, err := DB.Exec("DROP TABLE IF EXISTS " + "scan_results")
+	if err != nil {
+		log.Printf("Error dropping table ")
+	} else {
+		log.Printf("Table scan_results dropped.")
+	}
+	_, err = DB.Exec("DROP TABLE IF EXISTS " + "vulnerabilities")
+	if err != nil {
+		log.Printf("Error dropping table : %v\n", err)
+	} else {
+		log.Printf("Table vulnerabilites dropped.")
+	}
 }

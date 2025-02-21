@@ -3,3 +3,5 @@ db.sqlite3
 .gitignore
 .git/
 **/*.md
+*.db
+*.json

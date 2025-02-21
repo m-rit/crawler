@@ -45,3 +45,15 @@ type Summary struct {
 	FixableCount         int            `json:"fixable_count"`
 	Compliant            bool           `json:"compliant"`
 }
+
+type RequestPayload struct {
+	Repo  string   `json:"repo"`
+	Files []string `json:"files"`
+}
+
+type Filter struct {
+	Severity string `json:"severity"`
+}
+type Querypayload struct {
+	Filter Filter `json:"filters"`
+}
