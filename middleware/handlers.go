@@ -122,7 +122,7 @@ var scanhandler = func(writer http.ResponseWriter, request *http.Request) {
 
 }
 
-//HttpClient interface implements Do method that is used by both Http.Client and MockClient structs
+// HttpClient interface implements Do method that is used by both Http.Client and MockClient structs
 type HttpClient interface {
 	Do(req *http.Request) (*http.Response, error)
 }
@@ -130,7 +130,7 @@ type HttpClient interface {
 // client that sends reverseproxy request
 var client HttpClient = &http.Client{Timeout: time.Second * 10}
 
-//sendreverseproxy sends request to github.com to fetch json files for a particular filename
+// sendreverseproxy sends request to github.com to fetch json files for a particular filename
 func sendreverseproxy(file string, repo string) *http.Response {
 	//https://raw.githubusercontent.com/velancio/vulnerability_scans/refs/heads/main/vulnscan1011.json
 
@@ -150,21 +150,22 @@ func sendreverseproxy(file string, repo string) *http.Response {
 	return resp
 }
 
+//getfilefromreq parses the scan requests body to extract repo and file names
 func getfilefromreq(body io.ReadCloser) types.RequestPayload {
 
 	var payload types.RequestPayload
 
 	err := json.NewDecoder(body).Decode(&payload)
 	if err != nil {
-		fmt.Println("here error in decoding", err.Error())
+		log.Println("here error in decoding", err.Error())
 
 		return types.RequestPayload{}
 	}
-	fmt.Println("here")
 
 	return payload
 }
 
+//queryhandler implements the handler for query request. It parses the request body to get severity value and returns all matching rows in response
 var queryhandler = func(writer http.ResponseWriter, request *http.Request) {
 
 	results := []types.Vulnerability{}
