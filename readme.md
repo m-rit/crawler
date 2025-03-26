@@ -1,3 +1,5 @@
+Crawler scans vulerability files from a a given github location and process them and stores them in a database. There's an endpoint to query the stored vulnerabilties based on different filters
+
 
 ### docker commands:
 
